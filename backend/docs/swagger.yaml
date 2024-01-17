@@ -1,0 +1,121 @@
+basePath: /api
+definitions:
+  actions.GetUserResponse:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  actions.UserLoginRequest:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  actions.UserRegisterRequest:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+      password:
+        type: string
+    type: object
+  actions.UserTokenResponse:
+    properties:
+      token:
+        type: string
+    type: object
+  services.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+host: localhost
+info:
+  contact: {}
+  description: This is a Save My Pass API.
+  title: Save My Pass - API
+  version: "1.0"
+paths:
+  /user:
+    get:
+      consumes:
+      - application/json
+      description: Get information about the user
+      parameters:
+      - description: Authorization Bearer Token
+        in: header
+        name: Authorization
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{ ''id'': 6, ''name'': ''admin'', ''email'': ''admin@gmail.com''
+            }'
+          schema:
+            $ref: '#/definitions/actions.GetUserResponse'
+      summary: Get user info
+  /user/login:
+    post:
+      consumes:
+      - application/json
+      description: Log in a user using email and password
+      parameters:
+      - description: User Login
+        in: body
+        name: userLoginRequest
+        required: true
+        schema:
+          $ref: '#/definitions/actions.UserLoginRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "jakjdslskldaew"}'
+          schema:
+            $ref: '#/definitions/actions.UserTokenResponse'
+        "400":
+          description: '{"error": "error"}'
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+        "500":
+          description: '{"error": "error"}'
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+      summary: User login
+  /user/register:
+    post:
+      consumes:
+      - application/json
+      description: Register user by Email, Name and Password
+      parameters:
+      - description: User Registration
+        in: body
+        name: userRegisterRequest
+        required: true
+        schema:
+          $ref: '#/definitions/actions.UserRegisterRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: '{"token": "jakjdslskldaew"}'
+          schema:
+            $ref: '#/definitions/actions.UserTokenResponse'
+        "400":
+          description: '{"error": "error"}'
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+        "500":
+          description: '{"error": "error"}'
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+      summary: Register user
+swagger: "2.0"
