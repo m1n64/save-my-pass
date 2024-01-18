@@ -1,6 +1,7 @@
 package main
 
 import (
+	actions3 "backend/modules/categories/actions"
 	actions2 "backend/modules/users/actions"
 	"backend/modules/users/middlewares"
 	"backend/services"
@@ -34,6 +35,10 @@ func main() {
 
 // @host localhost
 // @BasePath /api
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 func routes(r *gin.Engine) {
 	r.GET("/ping", actions.Ping)
 
@@ -42,6 +47,15 @@ func routes(r *gin.Engine) {
 		user.GET("", middlewares.AuthMiddleware(), actions2.GetUser)
 		user.POST("/register", actions2.UserRegister)
 		user.POST("/login", actions2.UserLogin)
+	}
+
+	authEndpoints := r.Group("/", middlewares.AuthMiddleware())
+	category := authEndpoints.Group("/category")
+	{
+		category.GET("/all", actions3.GetCategories)
+		category.POST("/create", actions3.CreateCategory)
+		category.PUT("/update/:id", actions3.UpdateCategory)
+		category.DELETE("/delete/:id", actions3.DeleteCategory)
 	}
 
 	swaggerURL := ginSwagger.URL("http://localhost/api/docs/swagger.json")
@@ -58,7 +72,7 @@ func prometheusInit(r *gin.Engine) {
 
 	ramUsage := prometheus.NewGauge(prometheus.GaugeOpts{
 		Name: "backend_api_ram_usage_bytes",
-		Help: "RAM usage of the API service",
+		Help: "RAM usage of the API services",
 	})
 
 	cpuUsage := prometheus.NewGauge(prometheus.GaugeOpts{

@@ -9,6 +9,10 @@ type UserService struct {
 	DB *gorm.DB
 }
 
+func (s *UserService) getModel() models.UserModel {
+	return models.UserModel{DB: s.DB}
+}
+
 // CreateUser creates a new user with the given name, email, and password.
 //
 // Parameters:
@@ -19,8 +23,8 @@ type UserService struct {
 // Returns:
 // - models.Token: the token generated for the user.
 // - error: any error that occurred during user creation.
-func (u *UserService) CreateUser(name, email, password string) (models.Token, error) {
-	userModel := models.UserModel{DB: u.DB}
+func (s *UserService) CreateUser(name, email, password string) (models.Token, error) {
+	userModel := s.getModel()
 	userToken, err := userModel.CreateUser(name, email, password)
 	if err != nil {
 		return models.Token{}, err
@@ -33,8 +37,8 @@ func (u *UserService) CreateUser(name, email, password string) (models.Token, er
 //
 // It takes two parameters: email (string) and password (string).
 // It returns a Token (models.Token) and an error (error).
-func (u *UserService) LoginUser(email, password string) (models.Token, error) {
-	userModel := models.UserModel{DB: u.DB}
+func (s *UserService) LoginUser(email, password string) (models.Token, error) {
+	userModel := s.getModel()
 	userToken, err := userModel.LoginUser(email, password)
 
 	if err != nil {
@@ -51,8 +55,8 @@ func (u *UserService) LoginUser(email, password string) (models.Token, error) {
 // returns:
 //   - The user's token.
 //   - An error if the token is invalid or the user does not exist.
-func (u *UserService) GetUserByToken(token string) (models.Token, error) {
-	userModel := models.UserModel{DB: u.DB}
+func (s *UserService) GetUserByToken(token string) (models.Token, error) {
+	userModel := s.getModel()
 
 	return userModel.CheckToken(token)
 }

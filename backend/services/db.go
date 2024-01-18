@@ -1,6 +1,8 @@
 package services
 
 import (
+	models2 "backend/modules/categories/models"
+	models3 "backend/modules/passwords/models"
 	"backend/modules/users/models"
 	"fmt"
 	"gorm.io/driver/postgres"
@@ -45,4 +47,6 @@ func Migrations() {
 
 	db.AutoMigrate(&models.User{})
 	db.AutoMigrate(&models.Token{})
+	db.AutoMigrate(&models2.Category{})
+	db.AutoMigrate(&models3.Password{})
 }

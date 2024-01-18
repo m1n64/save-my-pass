@@ -1,7 +1,6 @@
 package actions
 
 import (
-	"backend/modules/users/models"
 	"backend/modules/users/services"
 	services2 "backend/services"
 	"github.com/gin-gonic/gin"
@@ -35,6 +34,7 @@ type GetUserResponse struct {
 // It does not return any values.
 // @Summary Register user
 // @Description Register user by Email, Name and Password
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param   userRegisterRequest  body    UserRegisterRequest  true  "User Registration"
@@ -45,14 +45,14 @@ type GetUserResponse struct {
 func UserRegister(c *gin.Context) {
 	var request UserRegisterRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, services2.ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	userService := services.UserService{DB: services2.GetDBConnection()}
+	userService := getService()
 	token, err := userService.CreateUser(request.Name, request.Email, request.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, services2.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -66,6 +66,7 @@ func UserRegister(c *gin.Context) {
 // Otherwise, it returns an error response with the appropriate status code.
 // @Summary User login
 // @Description Log in a user using email and password
+// @Tags Users
 // @Accept  json
 // @Produce  json
 // @Param   userLoginRequest  body    UserLoginRequest  true  "User Login"
@@ -76,15 +77,15 @@ func UserRegister(c *gin.Context) {
 func UserLogin(c *gin.Context) {
 	var request UserLoginRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, services2.ErrorResponse{Error: err.Error()})
 		return
 	}
 
-	userService := services.UserService{DB: services2.GetDBConnection()}
+	userService := getService()
 
 	token, err := userService.LoginUser(request.Email, request.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, services2.ErrorResponse{Error: err.Error()})
 		return
 	}
 
@@ -103,16 +104,25 @@ func UserLogin(c *gin.Context) {
 //
 // @Summary Get user info
 // @Description Get information about the user
+// @Tags Users
 // @Accept  json
 // @Produce  json
-// @Param   Authorization  header  string  true  "Authorization Bearer Token"
+// @Security BearerAuth
 // @Success 200 {object} GetUserResponse "{ 'id': 6, 'name': 'admin', 'email': 'admin@gmail.com' }"
 // @Router /user [get]
 func GetUser(c *gin.Context) {
-	user := c.MustGet("user").(models.Token)
+	user := services2.GetUserFromContext(c)
 	c.JSON(http.StatusOK, GetUserResponse{
 		ID:    user.User.ID,
 		Name:  user.User.Name,
 		Email: user.User.Email,
 	})
+}
+
+// getService returns an instance of the UserService.
+//
+// It does not take any parameters.
+// It returns a value of type services.UserService.
+func getService() services.UserService {
+	return services.UserService{DB: services2.GetDBConnection()}
 }

@@ -1,5 +1,17 @@
 basePath: /api
 definitions:
+  actions.CategoryRequestAndResponse:
+    properties:
+      id:
+        type: integer
+    required:
+    - id
+    type: object
+  actions.CreateOrUpdateCategoryRequest:
+    properties:
+      name:
+        type: string
+    type: object
   actions.GetUserResponse:
     properties:
       email:
@@ -30,6 +42,13 @@ definitions:
       token:
         type: string
     type: object
+  services.Category:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
   services.ErrorResponse:
     properties:
       error:
@@ -42,17 +61,134 @@ info:
   title: Save My Pass - API
   version: "1.0"
 paths:
+  /category/all:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the categories for the logged-in user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/services.Category'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Get list of categories
+      tags:
+      - Categories
+  /category/create:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new category with the provided name
+      parameters:
+      - description: Category name
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/actions.CreateOrUpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/services.Category'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Create a new category
+      tags:
+      - Categories
+  /category/delete/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: Deletes the category with the given ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/actions.CategoryRequestAndResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Delete category
+      tags:
+      - Categories
+  /category/update/{id}:
+    put:
+      consumes:
+      - application/json
+      description: Updates the category with the given ID
+      parameters:
+      - description: Category ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Category name
+        in: body
+        name: name
+        required: true
+        schema:
+          $ref: '#/definitions/actions.CreateOrUpdateCategoryRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/actions.CategoryRequestAndResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/services.ErrorResponse'
+      security:
+      - BearerAuth: []
+      summary: Update category
+      tags:
+      - Categories
   /user:
     get:
       consumes:
       - application/json
       description: Get information about the user
-      parameters:
-      - description: Authorization Bearer Token
-        in: header
-        name: Authorization
-        required: true
-        type: string
       produces:
       - application/json
       responses:
@@ -61,7 +197,11 @@ paths:
             }'
           schema:
             $ref: '#/definitions/actions.GetUserResponse'
+      security:
+      - BearerAuth: []
       summary: Get user info
+      tags:
+      - Users
   /user/login:
     post:
       consumes:
@@ -90,6 +230,8 @@ paths:
           schema:
             $ref: '#/definitions/services.ErrorResponse'
       summary: User login
+      tags:
+      - Users
   /user/register:
     post:
       consumes:
@@ -118,4 +260,11 @@ paths:
           schema:
             $ref: '#/definitions/services.ErrorResponse'
       summary: Register user
+      tags:
+      - Users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"
